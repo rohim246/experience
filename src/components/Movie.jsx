@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, FormGroup, Label, Input, Spinner } from "reactstrap";
-// import axios from "axios"
 import MovieList from "./MovieList";
-import {getMovie, setMovie} from './Movie.reducer';
-
+import {getDetailsMovie, getMovie, setDetailsMovie, setMovie} from './Movie.reducer';
+import { useHistory } from "react-router-dom";
+import { utilsChangeDash } from "../utils/utils";
 
 const Movie = () => {
-    const [title, setTitle] = useState("")
-    // const [movies, setMovies] = useState(null)
-    // const [isLoading, setIsLoading] = useState(false)
+    const [title, setTitle] = useState("");
     const isLoading = useSelector((state)=> state.movie.loading);
-    const movies = useSelector((state)=> state.movie.MovieData)
-
+    const movies = useSelector((state)=> state.movie.MovieData);
     const dispatch = useDispatch();
+    const history = useHistory();
 
     const handleTitle = (event) => {
         setTitle(event.target.value)
@@ -24,32 +22,15 @@ const Movie = () => {
 
         const response = await dispatch(getMovie({title}))
         dispatch(setMovie(response.payload.Search))
-        // setMovies(response)
-        // console.log(response.payload.Search)
-
-        // setIsLoading(true)
-
-        // const params = new URLSearchParams({
-        //     apikey: "9c7bdb5a",
-        //     s: title
-        // })
-
-        // const baseUrl = `https://www.omdbapi.com/?${params}`
-        // // console.log(baseUrl);
-
-        // try {
-        //     const resp = await axios.get(baseUrl)
-        //     console.log(resp);
-
-        //     setMovies(resp.data.Search)
-        //     setIsLoading(false)
-
-        // } catch (error) {
-        //     console.log(error);
-        // }
-        // console.log(movies);
     }
 
+    const handleOnClick = async (title) => {
+
+        const response = await dispatch(getDetailsMovie({title}))
+        dispatch(setDetailsMovie(response.payload))
+        const convertedTitleMovie = utilsChangeDash(response.payload.Title);
+        history.push(`/${convertedTitleMovie}`)
+    }
     return (
         <div 
             style=
@@ -96,7 +77,7 @@ const Movie = () => {
                 </Form>
                 <hr />
                 {isLoading && <Spinner color="danger" />}
-                {movies && !isLoading && <MovieList data={movies} />}
+                {movies && !isLoading && <MovieList data={movies} onClick={handleOnClick}/>}
             </div>
         </div>
     )
